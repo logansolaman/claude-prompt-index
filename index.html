@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Prompt Index</title>
+<meta name="description" content="80 AI prompts extracted from @claudepromptsadvantage, filterable by category.">
+<style>
+  :root{
+    --bg:#0b0b0f; --bg2:#12121a; --card:#15151f; --card-h:#1b1b27;
+    --line:#26263a; --line2:#33334d;
+    --fg:#eaeaF2; --fg2:#b4b4c8; --fg3:#9494ad;
+    --accent:#c9a227; --accent2:#e8c547;
+    --radius:14px;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  }
+  [data-theme="light"]{
+    --bg:#faf9f7; --bg2:#f2f1ed; --card:#ffffff; --card-h:#fdfcf9;
+    --line:#e3e1da; --line2:#d0cdc4;
+    --fg:#1a1a1f; --fg2:#4e4e5c; --fg3:#6b6b7a;
+    --accent:#9a7b16; --accent2:#b8912a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg); color:var(--fg); font-family:var(--sans);
+    -webkit-font-smoothing:antialiased; line-height:1.55;
+    padding:0 0 80px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  /* header */
+  header{
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,var(--bg2) 0%,var(--bg) 100%);
+    padding:44px 0 30px; margin-bottom:26px;
+  }
+  .topline{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  h1{font-size:clamp(26px,4vw,38px);font-weight:700;letter-spacing:-.03em;line-height:1.15}
+  h1 span{color:var(--accent2)}
+  .sub{color:var(--fg2);font-size:14.5px;margin-top:10px;max-width:62ch}
+  .sub a{color:var(--accent2);text-decoration:none;border-bottom:1px dotted currentColor}
+  .stats{display:grid;grid-template-columns:repeat(3,max-content);gap:0 44px;margin-top:24px}
+  .stat b{display:block;font-size:22px;font-weight:700;color:var(--fg);letter-spacing:-.02em}
+  .stat span{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--fg3);font-weight:600}
+
+  .themebtn{
+    background:var(--card);border:1px solid var(--line2);color:var(--fg);
+    width:42px;height:42px;border-radius:11px;cursor:pointer;font-size:18px;
+    display:grid;place-items:center;transition:.15s;flex:0 0 auto;
+  }
+  .themebtn:hover{border-color:var(--line2);color:var(--fg)}
+
+  /* controls */
+  .controls{position:sticky;top:0;z-index:40;background:var(--bg);
+    padding:16px 0 14px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+  .searchrow{display:flex;gap:10px;margin-bottom:13px}
+  .searchbox{position:relative;flex:1}
+  .searchbox svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    width:16px;height:16px;stroke:var(--fg3);fill:none;stroke-width:2}
+  #q{width:100%;background:var(--card);border:1px solid var(--line);color:var(--fg);
+    padding:11px 14px 11px 38px;border-radius:11px;font-size:14px;font-family:var(--sans);
+    outline:none;transition:.15s}
+  #q::placeholder{color:var(--fg3)}
+  #q:focus{border-color:var(--accent);background:var(--card-h)}
+  .sortsel{background:var(--card);border:1px solid var(--line2);color:var(--fg);
+    border-radius:11px;padding:0 12px;font-size:13px;font-family:var(--sans);
+    outline:none;cursor:pointer;min-width:158px}
+  .sortsel:focus{border-color:var(--accent)}
+
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{
+    background:var(--card);border:1px solid var(--line2);color:var(--fg);
+    padding:6px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;
+    transition:.14s;font-family:var(--sans);white-space:nowrap;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+  .chip:hover{border-color:var(--line2);color:var(--fg)}
+  .chip .n{color:var(--fg3);font-size:11px;font-variant-numeric:tabular-nums;padding-left:7px;margin-left:1px;border-left:1px solid var(--line2)}
+  .chip[aria-pressed="true"]{
+    background:var(--accent);border-color:var(--accent);color:#12120a;font-weight:600;
+  }
+  .chip[aria-pressed="true"] .n{color:#3f340a;border-left-color:rgba(0,0,0,.28);font-weight:700}
+  .tagchip{border-style:dashed}
+  .tagchip[aria-pressed="true"]{
+    background:transparent;border-color:var(--accent2);border-style:solid;
+    color:var(--accent2);font-weight:600;
+  }
+  .tagrow{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .rowlabel{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;font-weight:700;color:var(--fg2);flex:0 0 auto;min-width:34px}
+  .divider{width:1px;background:var(--line);margin:0 4px;align-self:stretch}
+
+  /* results bar */
+  .resultbar{display:flex;justify-content:space-between;align-items:center;
+    padding:14px 0 6px;font-size:12.5px;color:var(--fg2);gap:12px;flex-wrap:wrap}
+  .clear{background:none;border:none;color:var(--accent2);cursor:pointer;
+    font-size:12.5px;font-family:var(--sans);text-decoration:underline;padding:0}
+
+  /* cards */
+  .grid{display:grid;gap:12px;grid-template-columns:1fr}
+  @media(min-width:860px){.grid{grid-template-columns:1fr 1fr}}
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 17px;display:flex;flex-direction:column;gap:11px;
+    transition:.16s;position:relative;
+  }
+  .card:hover{border-color:var(--line2);background:var(--card-h)}
+  .cardhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .cardtitle{font-size:15px;font-weight:650;letter-spacing:-.01em;line-height:1.3}
+  .cat{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;
+    color:var(--accent);white-space:nowrap;padding-top:3px;
+  }
+  .ptext{
+    font-family:var(--mono);font-size:12.4px;line-height:1.62;color:var(--fg2);
+    white-space:pre-wrap;word-break:break-word;
+    max-height:5.1em;overflow:hidden;position:relative;
+    transition:max-height .25s ease;
+  }
+  .ptext::after{
+    content:"";position:absolute;inset:auto 0 0 0;height:3.4em;
+    background:linear-gradient(180deg,rgba(21,21,31,0) 0%,var(--card) 78%);
+    pointer-events:none;transition:opacity .2s;
+  }
+  .card.open .ptext{max-height:none}
+  .card.open .ptext::after{opacity:0}
+  .cardfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;
+    padding-top:2px;flex-wrap:wrap}
+  .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .tg{font-size:10.5px;color:var(--fg2);background:var(--bg2);
+    padding:2px 7px;border-radius:5px;border:1px solid var(--line)}
+  .acts{display:flex;gap:6px}
+  .btn{
+    background:var(--bg2);border:1px solid var(--line);color:var(--fg2);
+    font-size:11.5px;padding:5px 11px;border-radius:7px;cursor:pointer;
+    font-family:var(--sans);transition:.14s;white-space:nowrap;
+  }
+  .btn:hover{border-color:var(--line2);color:var(--fg)}
+  .btn.primary{color:var(--accent2);border-color:var(--line2)}
+  .btn.primary:hover{background:var(--accent);color:#12120a;border-color:var(--accent)}
+  .btn.done{background:var(--accent);color:#12120a;border-color:var(--accent)}
+
+  .empty{margin-top:26px;text-align:center;padding:56px 24px;color:var(--fg3);background:var(--card);border:1px dashed var(--line2);border-radius:var(--radius)}
+  .empty b{display:block;color:var(--fg);font-size:17px;margin-bottom:7px;font-weight:650}
+  .empty .btn{margin-top:18px;padding:8px 18px;font-size:12.5px}
+
+  footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);
+    color:var(--fg2);font-size:12px;display:flex;justify-content:space-between;
+    gap:14px;flex-wrap:wrap}
+
+  /* toast */
+  #toast{
+    position:fixed;bottom:22px;left:50%;transform:translate(-50%,80px);
+    background:var(--accent);color:#12120a;padding:10px 20px;border-radius:10px;
+    font-size:13px;font-weight:600;opacity:0;transition:.25s;z-index:100;
+    pointer-events:none;box-shadow:0 8px 26px rgba(0,0,0,.4);
+  }
+  #toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="topline">
+      <div>
+        <h1>Claude Prompt <span>Index</span></h1>
+        <p class="sub">80 prompts extracted from <a href="https://www.threads.com/@claudepromptsadvantage" target="_blank" rel="noopener">@claudepromptsadvantage</a> on Threads — crawled 183 posts. Filter by category, search, and copy straight into Claude.</p>
+      </div>
+      <button class="themebtn" id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>80</b><span>Prompts</span></div>
+      <div class="stat"><b>8</b><span>Categories</span></div>
+      <div class="stat"><b>183</b><span>Posts crawled</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="searchrow">
+      <div class="searchbox">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input id="q" type="search" placeholder="Search prompts, roles, niches…" autocomplete="off" spellcheck="false">
+      </div>
+      <select class="sortsel" id="sort">
+        <option value="cat">By category</option>
+        <option value="az">A → Z</option>
+        <option value="new">Newest</option>
+        <option value="len">Longest</option>
+      </select>
+    </div>
+    <div class="chips" id="cats"></div>
+    <div class="tagrow"><span class="rowlabel">Tags</span><div class="chips" id="tags"></div></div>
+  </div>
+
+  <div class="resultbar">
+    <span id="count">Loading…</span>
+    <button class="clear" id="clear" hidden>Reset filters</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden><b>No prompts match</b>Try a different search or clear the filters.
+    <button class="btn" id="emptyreset">Reset filters</button></div>
+
+  <footer>
+    <span>Source: <a href="https://www.threads.com/@claudepromptsadvantage" target="_blank" rel="noopener" style="color:var(--accent2)">@claudepromptsadvantage</a> · collected 2026-10-22</span>
+    <span>80 prompts · single-page, no tracking</span>
+  </footer>
+</div>
+
+<div id="toast">Copied</div>
+
+<script id="data" type="application/json">{"meta":{"source":"https://www.threads.com/@claudepromptsadvantage","collected":"2026-10-22","posts_crawled":183,"total":80,"categories":{"Career & Jobs":11,"YouTube":11,"Brand & Positioning":3,"Web & Design":23,"Business & Clients":12,"Instagram & Social":6,"Health & Fitness":7,"Freelance Income":7}},"prompts":[{"id":1,"title":"Zero To $1,000 Service","prompt":"Act as a beginner resume business coach. I have no experience. Build my 45-day plan to earn $1,000/month writing resumes at $50 each for 20 clients, using Claude to help me draft and improve. Give weekly steps in plain language. Skip the hype and give me honest, practical guidance I can actually use this week. Give me two options at the end so I can choose the one that feels easier. Give me the exact steps in order, with no jargon and no skipped parts.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"22m","url":"https://www.threads.com/@claudepromptsadvantage/post/DezeDShEw9G"},{"id":2,"title":"Zero To 30 Shorts","prompt":"Act as a beginner Shorts coach. I have never posted a Short. Build my one-week plan to plan, film, and schedule 30 Shorts about [topic] using only my phone. Give a clear task for each day in plain language. Skip the hype and give me honest, practical guidance I can actually use this week. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"YouTube","tags":["beginner","plan"],"posted":"2h","url":"https://www.threads.com/@claudepromptsadvantage/post/DezQLvpAiia"},{"id":3,"title":"Principal Brand Strategist","prompt":"Act as a Principal Brand Strategist. I want to build a complete brand identity and website in one afternoon. Conduct a 10-minute diagnostic based on my core offering: [Offering] and target audience: [Audience]. Deliver a strict, high-contrast text validation layout mapping my core value proposition, high-status category positioning, and visual aesthetic direction to establish instant market authority.","category":"Brand & Positioning","tags":["website-build"],"posted":"4h","url":"https://www.threads.com/@claudepromptsadvantage/post/DezCj_8CAH1"},{"id":4,"title":"Principal YouTube Growth Architect","prompt":"Act as a Principal YouTube Growth Architect. I want to build a YouTube channel to full YPP monetization in 90 days from zero. Conduct a 10-minute diagnostic based on my niche interest: [Niche] and skills: [Skills]. Deliver a strict, high-contrast text validation layout mapping 3 high-RPM sub-topics, target audience avatars, and a 90-day upload cadence designed to capture search and suggested traffic.","category":"YouTube","tags":["money","beginner","30-day"],"posted":"6h","url":"https://www.threads.com/@claudepromptsadvantage/post/Dey01VpDUKB"},{"id":5,"title":"Elite Creative Web Architect (1)","prompt":"Act as an Elite Creative Web Architect. I want to build a $35K-quality animated portfolio website for my creative work from zero with no coding required. Conduct a rapid 10-minute DOM layout sprint. Deliver a clean layout skeleton using strict semantic HTML5 elements (header, nav, main, section, footer) coupled with a high-performance WebGL canvas, completely bypassing generic div wrappers.","category":"Web & Design","tags":["money","beginner","website-build"],"posted":"8h","url":"https://www.threads.com/@claudepromptsadvantage/post/DeynHcYDvoR"},{"id":6,"title":"Zero To First $500 (1)","prompt":"Act as a beginner organizing business coach. I have no experience but I am tidy. Build my 30-day plan to earn my first $500 organizing homes in [my area]. Give weekly steps in plain language. Assume I have never done this before and explain anything unfamiliar in one short line. Make it realistic for someone starting from zero with a small budget and limited free time. Format it as a clear numbered list so I can follow along and check things off.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"10h","url":"https://www.threads.com/@claudepromptsadvantage/post/DeyZaVNCXwt"},{"id":7,"title":"Zero To First 90 Days Plan","prompt":"Act as a new job coach. I am starting as [job title] at [company type] and want a plan for my first 90 days that builds trust and leads to a raise within 12 months. Give weekly goals in simple language. Skip the hype and give me honest, practical guidance I can actually use this week. Assume I have never done this before and explain anything unfamiliar in one short line. Remember that I am a beginner, so patience and clarity matter more than speed.","category":"Career & Jobs","tags":["beginner","plan"],"posted":"12h","url":"https://www.threads.com/@claudepromptsadvantage/post/DeyLpS3Clm_"},{"id":8,"title":"Zero To 1,000 With Carousels","prompt":"Act as a beginner Instagram carousel coach. I have zero followers and do not want to make videos. Build my 45-day plan to reach 1,000 followers using carousel posts about [niche]. Give weekly goals and simple steps. Make it realistic for someone starting from zero with a small budget and limited free time. Make every instruction specific enough that I never have to guess what you mean. Tell me how to know it is working before I move to the next step.","category":"Instagram & Social","tags":["beginner","30-day","plan"],"posted":"14h","url":"https://www.threads.com/@claudepromptsadvantage/post/Dex9-TWjSMO"},{"id":9,"title":"Zero To Podcast Website","prompt":"Act as a beginner web coach. I have a podcast idea and no website. Plan a $20K-quality animated podcast website about [topic] using free or cheap tools. Give steps in order, in plain language and with no coding. Assume I have never done this before and explain anything unfamiliar in one short line. Make every instruction specific enough that I never have to guess what you mean. Format it as a clear numbered list so I can follow along and check things off.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"16h","url":"https://www.threads.com/@claudepromptsadvantage/post/DexwQKWEuMt"},{"id":10,"title":"Zero To 14-Day Sleep Plan","prompt":"Act as a beginner sleep habit coach. My sleep is inconsistent and I wake up tired. Build a 14-day plan to fall asleep faster using simple habits that fit my schedule of [describe]. Keep it gentle and realistic. Assume I have never done this before and explain anything unfamiliar in one short line. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Give me the exact steps in order, with no jargon and no skipped parts.","category":"Health & Fitness","tags":["beginner","30-day","plan"],"posted":"18h","url":"https://www.threads.com/@claudepromptsadvantage/post/DexigRjEpWV"},{"id":11,"title":"Zero To $300/Month Editor","prompt":"Act as a beginner video editing coach. I have never edited video. Build my 45-day plan to earn $300/month editing videos for small YouTubers using free tools. Give weekly steps in plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Assume I have never done this before and explain anything unfamiliar in one short line. Format it as a clear numbered list so I can follow along and check things off.","category":"Freelance Income","tags":["money","beginner","30-day","plan"],"posted":"20h","url":"https://www.threads.com/@claudepromptsadvantage/post/DexUuWEkcg2"},{"id":12,"title":"Zero To Event Website","prompt":"Act as a beginner web coach. I have no website. Plan a $15K-quality animated event website for my [wedding or event] with online RSVP, built in 45 minutes with free tools. Give steps in order and plain language. Focus on the few actions that matter most and ignore everything else. Make it realistic for someone starting from zero with a small budget and limited free time. Skip the hype and give me honest, practical guidance I can actually use this week.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"22h","url":"https://www.threads.com/@claudepromptsadvantage/post/DexHAZ-iZPb"},{"id":13,"title":"Zero To First $600","prompt":"Act as a beginner proofreading coach. I have no experience but I notice mistakes easily. Build my 30-day plan to earn my first $600 proofreading for clients. Give weekly steps and keep the language simple. Remember that I am a beginner, so patience and clarity matter more than speed. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dew3ccAAoOc"},{"id":14,"title":"Zero To Resume Website","prompt":"Act as a beginner web coach. I have no website. Plan a premium animated online resume website for me as a [job title] that can help me get hired for $50,000 roles. Give steps in order and plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Skip the hype and give me honest, practical guidance I can actually use this week. Remember that I am a beginner, so patience and clarity matter more than speed.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/DewoL5TArvk"},{"id":15,"title":"Zero To First $200 Sale","prompt":"Act as a beginner brand coach. I have no business name, logo, or product. Build my 14-day plan to launch a small brand around [idea] and make my first $200 sale. Give one clear task per day in plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Skip the hype and give me honest, practical guidance I can actually use this week. Avoid technical terms, and if you must use one, explain it right away.","category":"Brand & Positioning","tags":["money","beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dewe9augmi4"},{"id":16,"title":"Zero To 3 Clients Plan","prompt":"Act as a beginner coaching business coach. I have no coaching experience but I know [topic] from real life. Build my 30-day plan to land 3 clients at $200/month each. Give weekly steps in plain language. If something could go wrong for a beginner, warn me and show how to avoid it. Make it realistic for someone starting from zero with a small budget and limited free time. Make every instruction specific enough that I never have to guess what you mean.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/DewQDGOglmc"},{"id":17,"title":"Zero To Monetization Ready","prompt":"Act as a beginner YouTube policy coach. I am starting a channel about [topic]. Build my plan to pass the monetization review on my first try. Explain each requirement in plain words and give a simple checklist. Make it realistic for someone starting from zero with a small budget and limited free time. Add a quick example so I can see exactly what good looks like. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"YouTube","tags":["money","beginner","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/DewCWJVim1i"},{"id":18,"title":"Zero To First $500 Template","prompt":"Act as a beginner template business coach. I barely know spreadsheets. Build my 30-day plan to create and sell a simple template about [topic, such as budgeting] and earn $500. Give weekly steps in plain language. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Skip the hype and give me honest, practical guidance I can actually use this week. Give me two options at the end so I can choose the one that feels easier.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dev0nIFAICU"},{"id":19,"title":"Zero To Remote Job Plan","prompt":"Act as a beginner remote career coach. I have no tech experience and want a remote entry-level job paying about $55,000. Build my 30-day plan using my background of [describe]. Give weekly steps in plain language. Include a simple checklist at the end that I can copy into my notes. Assume I have never done this before and explain anything unfamiliar in one short line. Make every instruction specific enough that I never have to guess what you mean.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/Devm2mokqmq"},{"id":20,"title":"Zero To First $150 Deal","prompt":"Act as a beginner creator partnership coach. I have a small Instagram account of [followers] in [niche] and no brand deals. Build my 30-day plan to land a first paid collaboration of $150. Give weekly steps in plain language. Keep every step small enough to finish in a single sitting. Make it realistic for someone starting from zero with a small budget and limited free time. Skip the hype and give me honest, practical guidance I can actually use this week.","category":"Instagram & Social","tags":["money","beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/DevZInRkrev"},{"id":21,"title":"Zero To Cinematic Homepage","prompt":"Act as a beginner web coach. I have no website. Plan a $40K-quality cinematic 3D-style animated homepage for [my brand] using free or cheap tools. Give the steps in order, in plain language, with no coding needed. Avoid technical terms, and if you must use one, explain it right away. Format it as a clear numbered list so I can follow along and check things off. Make it realistic for someone starting from zero with a small budget and limited free time.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/DevLeKDAbNi"},{"id":22,"title":"Zero To 30-Day Stretch Plan","prompt":"Act as a beginner mobility coach. I am stiff and have never stretched regularly. Build a 30-day plan of 15-minute daily routines for [my goal, such as back, hips, or desk stiffness]. Keep it safe, gentle, and clear. Make it realistic for someone starting from zero with a small budget and limited free time. Tell me how to know it is working before I move to the next step. Keep the tone friendly and encouraging, like a patient teacher helping a friend.","category":"Health & Fitness","tags":["beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/Deu9sRDDxpB"},{"id":23,"title":"Zero To Natural In 7 Days","prompt":"Act as a beginner on-camera coach. I feel awkward and nervous on video. Build a 7-day plan to help me talk naturally on camera for my channel about [topic]. Give one short daily exercise in plain, encouraging language. Use free tools only and name each one so I can find it easily. If something could go wrong for a beginner, warn me and show how to avoid it. Make it realistic for someone starting from zero with a small budget and limited free time.","category":"Health & Fitness","tags":["beginner","30-day","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/Deuv5QXkYxI"},{"id":24,"title":"Zero To Booking Website (1)","prompt":"Act as a beginner web coach. I run [a salon or barber business] with no website. Plan an $18K-quality animated site with online booking that I can build with free or cheap tools. Give steps in order and plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Avoid technical terms, and if you must use one, explain it right away. Format it as a clear numbered list so I can follow along and check things off.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"1d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeuiMO7jqsE"},{"id":25,"title":"Zero To First $400","prompt":"Act as a beginner local service coach. I have no special skills and no money to invest. Build my 30-day plan to earn $400 doing local services like pet sitting, cleaning, or errands in [my area]. Give weekly steps in plain language. Keep every step small enough to finish in a single sitting. Make it realistic for someone starting from zero with a small budget and limited free time. Give me two options at the end so I can choose the one that feels easier.","category":"Freelance Income","tags":["money","beginner","30-day","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeuRTvXAugc"},{"id":26,"title":"Zero To Creative Portfolio","prompt":"Act as a beginner web coach. I am a [designer, writer, or artist] with no website. Plan a $35K-quality animated 3D-style portfolio I can build with free or cheap tools. Give every step in order and plain language. Skip the hype and give me honest, practical guidance I can actually use this week. Give me two options at the end so I can choose the one that feels easier. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/Det4_n-jd-M"},{"id":27,"title":"Zero To 5 Clients Plan","prompt":"Act as a beginner client acquisition coach. I know nobody in business. Build my 30-day plan to land 5 clients paying $300 each for [service]. Give weekly goals and a daily outreach target in plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Format it as a clear numbered list so I can follow along and check things off.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DetrTqGkZK_"},{"id":28,"title":"Zero To First $500 (2)","prompt":"Act as a beginner print-on-demand coach. I have no inventory, no design skills, and no budget. Build my 45-day plan to earn my first $500 selling designs on products like shirts and mugs. Give weekly steps in plain language. Avoid technical terms, and if you must use one, explain it right away. Remember that I am a beginner, so patience and clarity matter more than speed. Skip the hype and give me honest, practical guidance I can actually use this week.","category":"Freelance Income","tags":["money","beginner","30-day","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DetdlDGj1B3"},{"id":29,"title":"Zero To 100 Subscribers","prompt":"Act as a beginner YouTube coach. I have zero subscribers. Build my 14-day plan to get my first 100 subscribers on a channel about [topic] using only my phone. Give me one action per day in plain language. Skip the hype and give me honest, practical guidance I can actually use this week. Make it realistic for someone starting from zero with a small budget and limited free time. Format it as a clear numbered list so I can follow along and check things off.","category":"YouTube","tags":["beginner","30-day","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DesApIcAgXo"},{"id":30,"title":"Zero To 30 Video Ideas","prompt":"Act as a beginner YouTube strategist. I have no content. Build a bank of 30 video ideas for a channel about [topic], each with a title, a one-line summary, and the viewer question it answers. Keep ideas easy to film. Make it realistic for someone starting from zero with a small budget and limited free time. Make the whole answer short enough to read in two minutes. Skip the hype and give me honest, practical guidance I can actually use this week.","category":"YouTube","tags":["beginner"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DetPyvQkqAJ"},{"id":31,"title":"Zero To First $250","prompt":"Act as a beginner freelance writing coach. I have no experience and no portfolio. Build my 30-day plan to earn my first $250 writing for clients, using Claude to help me draft and improve. Give weekly steps in plain language. Skip the hype and give me honest, practical guidance I can actually use this week. Avoid technical terms, and if you must use one, explain it right away. Give me two options at the end so I can choose the one that feels easier.","category":"Web & Design","tags":["money","beginner","30-day","website-build","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DetCC7hj90n"},{"id":32,"title":"Zero To Job Offer Plan","prompt":"Act as a beginner interview coach. I have never interviewed. Build my 21-day plan to land a $48,000 job in [field]. Give weekly goals, daily practice tasks, and simple steps in plain language. Assume I have never done this before and explain anything unfamiliar in one short line. Make it realistic for someone starting from zero with a small budget and limited free time. If something could go wrong for a beginner, warn me and show how to avoid it.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/Des0VX-km8M"},{"id":33,"title":"Zero To 30 Days Of Posts","prompt":"Act as a beginner Instagram strategist. I have no content plan. Build 30 days of post ideas for [niche] that can take me to 500 followers. Mix Reels, carousels, and photos, with one line on the goal of each post. Keep the tone friendly and encouraging, like a patient teacher helping a friend. If something could go wrong for a beginner, warn me and show how to avoid it. Remember that I am a beginner, so patience and clarity matter more than speed.","category":"Instagram & Social","tags":["beginner","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DesmmFvkxqW"},{"id":34,"title":"Zero To Sales Bio Page","prompt":"Act as a beginner web coach. I only have a basic link in my bio. Plan a premium animated link-in-bio website for my [niche] that turns followers into $500 in sales, using free tools. Give steps in plain language. Give me the exact steps in order, with no jargon and no skipped parts. Assume I have never done this before and explain anything unfamiliar in one short line. Remember that I am a beginner, so patience and clarity matter more than speed.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DesY15ACiZh"},{"id":35,"title":"Zero To First 5K Plan","prompt":"Act as a beginner running coach. I cannot run for even 2 minutes. Build an 8-week plan to finish my first 5K with [days] training days a week. Use run-walk intervals and keep each week gentle, safe, and realistic. Focus on the few actions that matter most and ignore everything else. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"Health & Fitness","tags":["beginner","30-day","plan"],"posted":"2d","url":"https://www.threads.com/@claudepromptsadvantage/post/DesLyPbAiGu"},{"id":36,"title":"Zero To Product Page","prompt":"Act as a beginner web coach. I have a first product, [product], and no website. Plan a $30K-quality animated 3D-style product page that I can build with free or cheap tools. Give steps in order, in plain words. Remember that I am a beginner, so patience and clarity matter more than speed. Make every instruction specific enough that I never have to guess what you mean. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dervuv9geS-"},{"id":37,"title":"Zero To First $300 (1)","prompt":"Act as a beginner reselling coach. I have no inventory and no money to spend. Build my 30-day plan to earn my first $300 reselling items online, starting with things I already own. Give weekly steps in plain language. Assume I have never done this before and explain anything unfamiliar in one short line. If something could go wrong for a beginner, warn me and show how to avoid it. Focus on the few actions that matter most and ignore everything else.","category":"Freelance Income","tags":["money","beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/Derh8VOiagE"},{"id":38,"title":"Zero To Tutoring Website","prompt":"Act as a beginner web coach. I have no website. Plan a $20K-quality animated website for my tutoring in [subject] that books students online, using free or cheap tools. Give every step in order and in plain language. Skip the hype and give me honest, practical guidance I can actually use this week. Use free tools only and name each one so I can find it easily. Make it realistic for someone starting from zero with a small budget and limited free time.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DerUPO8D50C"},{"id":39,"title":"Zero To $800/Month Plan","prompt":"Act as a beginner social media business coach. I have no clients and no experience. Build my 30-day plan to earn $800/month managing social media for 2 local businesses at $400 each. Give weekly steps in plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Skip the hype and give me honest, practical guidance I can actually use this week. Write it in plain words a complete beginner understands.","category":"Instagram & Social","tags":["money","beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DerGgEciu38"},{"id":40,"title":"Zero To $1,000 As A VA","prompt":"Act as a beginner virtual assistant coach. I have no experience. Build my 30-day plan to earn my first $1,000 helping small business owners with tasks I can learn quickly. Give weekly steps in plain language. Assume I have never done this before and explain anything unfamiliar in one short line. Include a simple checklist at the end that I can copy into my notes. Make it realistic for someone starting from zero with a small budget and limited free time.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeqrEipgFMw"},{"id":41,"title":"Zero To First $100","prompt":"Act as a beginner affiliate coach. I have never earned affiliate income. Build my 30-day plan to earn my first $100 from YouTube videos about [topic]. Give weekly steps and explain every term in plain words. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Skip the hype and give me honest, practical guidance I can actually use this week. Make every instruction specific enough that I never have to guess what you mean.","category":"YouTube","tags":["money","beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeqdSXcgjwK"},{"id":42,"title":"Zero To Paid Skill In 30 Days","prompt":"Act as a beginner skill coach. I know nothing about [skill]. Build my 30-day plan to learn it well enough to earn my first $300. Give me weekly goals, daily practice tasks, and a simple first offer to sell. Remember that I am a beginner, so patience and clarity matter more than speed. Assume I have never done this before and explain anything unfamiliar in one short line. Format it as a clear numbered list so I can follow along and check things off.","category":"Freelance Income","tags":["money","beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeqPkjKD3Ps"},{"id":43,"title":"Zero To Resume In 7 Days","prompt":"Act as a beginner resume coach. I have never made a resume. Build my 7-day plan to create one that gets interviews for [job type] roles paying about $45,000. Give one clear task each day in plain language. Give me two options at the end so I can choose the one that feels easier. Make it realistic for someone starting from zero with a small budget and limited free time. Make every instruction specific enough that I never have to guess what you mean.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeqBxmrjyYy"},{"id":44,"title":"Zero To First $200","prompt":"Act as a beginner Instagram sales coach. I have never sold anything. Build my 14-day plan to earn my first $200 through Instagram DMs selling [offer] without a website. Give me one daily action in plain language. Make it realistic for someone starting from zero with a small budget and limited free time. Assume I have never done this before and explain anything unfamiliar in one short line. Tell me how to know it is working before I move to the next step.","category":"Web & Design","tags":["money","beginner","30-day","website-build","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dep0HCNAQ2J"},{"id":45,"title":"Zero To Personal Brand Site","prompt":"Act as a beginner brand coach. I have no online presence. Plan a $25K-quality animated personal brand website for me as a [profession], built in one afternoon with free or cheap tools. Give steps in order and plain language. Format it as a clear numbered list so I can follow along and check things off. Make every instruction specific enough that I never have to guess what you mean. Give me two options at the end so I can choose the one that feels easier.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DepmTWVgsaj"},{"id":46,"title":"Zero To 60-Day Strength Plan","prompt":"Act as a beginner strength coach. I have never trained and have no gym. Build a 60-day home plan to build muscle with [equipment] and [days] days a week. Keep every workout short, safe, and easy to follow. Remember that I am a beginner, so patience and clarity matter more than speed. Make it realistic for someone starting from zero with a small budget and limited free time. Format it as a clear numbered list so I can follow along and check things off.","category":"Health & Fitness","tags":["beginner","30-day","plan"],"posted":"3d","url":"https://www.threads.com/@claudepromptsadvantage/post/DepXGv9gkS3"},{"id":47,"title":"Zero To 1,000 Views","prompt":"Act as a beginner YouTube coach. I have zero views. Build my 7-day plan to get one video about [topic] to 1,000 views using only my phone. Give me one action per day in plain language, from idea to promotion. If something could go wrong for a beginner, warn me and show how to avoid it. Format it as a clear numbered list so I can follow along and check things off. Make it realistic for someone starting from zero with a small budget and limited free time.","category":"YouTube","tags":["beginner","30-day","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/DepEtJcAiui"},{"id":48,"title":"Zero To Course Website","prompt":"Act as a beginner web coach. I have no course and no website. Plan a premium animated sales website for my first online course about [topic], priced at $97. Give me every step in order, in plain beginner language. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Format it as a clear numbered list so I can follow along and check things off. Skip the hype and give me honest, practical guidance I can actually use this week.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/Deove-ziLXc"},{"id":49,"title":"Zero To $500 Templates","prompt":"Act as a beginner digital product coach. I have no products and no design skills. Build my 30-day plan to earn my first $500 selling printable templates about [topic] on a free marketplace. Give weekly steps in plain language. If something could go wrong for a beginner, warn me and show how to avoid it. Format it as a clear numbered list so I can follow along and check things off. Give me the exact steps in order, with no jargon and no skipped parts.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeoglpugmUz"},{"id":50,"title":"Zero To One-Page Site","prompt":"Act as a beginner web designer. I have no website and no coding skills. Plan a premium, smoothly animated one-page website for [my small business] that I can finish in 20 minutes. List every step in order and keep it simple. Include a simple checklist at the end that I can copy into my notes. Give me two options at the end so I can choose the one that feels easier. Skip the hype and give me honest, practical guidance I can actually use this week.","category":"Web & Design","tags":["beginner","website-build","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeoNJNUjzLr"},{"id":51,"title":"Zero To $1,000 In 5 Hours","prompt":"Act as a beginner side business coach. I work full-time and have only 5 free hours a week. Build my plan to reach $1,000/month using my skills in [X]. Show what to do in each weekly session and what to skip completely. Keep the tone friendly and encouraging, like a patient teacher helping a friend. If something could go wrong for a beginner, warn me and show how to avoid it. Remember that I am a beginner, so patience and clarity matter more than speed.","category":"Business & Clients","tags":["money","beginner","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/Den_af3EbYc"},{"id":52,"title":"Zero To $1,000 Product Plan","prompt":"Act as a beginner product coach. I have no audience and no products. Build my 45-day plan to create and sell one digital product about [what I know] and reach my first $1,000. Give weekly goals in plain, simple language. If something could go wrong for a beginner, warn me and show how to avoid it. Give me the exact steps in order, with no jargon and no skipped parts. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/Denxsb5Ag7s"},{"id":53,"title":"Zero To First $300 Plan","prompt":"Act as a beginner YouTube coach. I have never made a video. Build my 60-day plan to start a screen-recording tutorial channel about [software or skill] and earn my first $300 from ads or affiliate links. Keep every step plain. Add a quick example so I can see exactly what good looks like. Include a simple checklist at the end that I can copy into my notes. Make it realistic for someone starting from zero with a small budget and limited free time.","category":"YouTube","tags":["money","beginner","30-day","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/Denj2YvDOgD"},{"id":54,"title":"Zero To $1,000 Saved","prompt":"Act as a beginner money coach. I have zero savings. Build my 90-day plan to save $1,000 using my income of [X] and expenses of [list]. Give me weekly savings targets and simple steps written in plain, judgment-free language. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Make it realistic for someone starting from zero with a small budget and limited free time. Keep every step small enough to finish in a single sitting.","category":"Freelance Income","tags":["money","beginner","30-day","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/DenWJw5DeKt"},{"id":55,"title":"Zero To $5,000 Raise Plan","prompt":"Act as a beginner negotiation coach. I have never asked for a raise. Build my plan to ask for a $5,000 raise at [my job] in the next 30 days. Give me steps in order, written in calm and simple language. Make every instruction specific enough that I never have to guess what you mean. Format it as a clear numbered list so I can follow along and check things off. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"Career & Jobs","tags":["money","beginner","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/DenEaTXghVB"},{"id":56,"title":"Zero To 5,000 Plan","prompt":"Act as a beginner Instagram coach. I have zero followers and zero posts. Build my 60-day plan to reach 5,000 followers and earn my first $300 in [niche]. Give me weekly goals and a daily action that takes under 45 minutes. Make every instruction specific enough that I never have to guess what you mean. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Avoid technical terms, and if you must use one, explain it right away.","category":"Instagram & Social","tags":["money","beginner","30-day","plan"],"posted":"4d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dem1sPGAqqD"},{"id":57,"title":"Zero To First Website Sale","prompt":"Act as a beginner web business coach. I have no design skills. Build my plan to sell simple premium websites to local businesses at $500 each using Claude to do the building. Give me a 30-day plan in plain, beginner language. Give me two options at the end so I can choose the one that feels easier. Keep the tone friendly and encouraging, like a patient teacher helping a friend. If something could go wrong for a beginner, warn me and show how to avoid it.","category":"Web & Design","tags":["money","beginner","30-day","website-build","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DemivSgAsar"},{"id":58,"title":"Zero To 30-Day Plan","prompt":"Act as a beginner fitness coach. I am out of shape and have no equipment or gym. Build a 30-day home plan to lose 10 pounds safely, based on my current weight of [X] and [minutes] free minutes a day. Keep it simple and gentle. Avoid technical terms, and if you must use one, explain it right away. Remember that I am a beginner, so patience and clarity matter more than speed. Make every instruction specific enough that I never have to guess what you mean.","category":"Health & Fitness","tags":["beginner","30-day","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DemPcpXAnEq"},{"id":59,"title":"Zero To $500/Month Plan","prompt":"Act as a beginner YouTube coach. I have zero videos and zero subscribers. Build my 6-month plan to reach $500/month from a channel about [topic]. Give me monthly milestones and a simple weekly routine in plain language. Make the whole answer short enough to read in two minutes. Make it realistic for someone starting from zero with a small budget and limited free time. Assume I have never done this before and explain anything unfamiliar in one short line.","category":"YouTube","tags":["money","beginner","30-day","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/Del9kBqAmrC"},{"id":60,"title":"Zero To Earning Blog","prompt":"Act as a beginner blogging coach. I have no website and no writing experience. Plan a clean, animated blog website about [topic] that can earn $500/month, using free or cheap tools. Give me every step in order and in plain words. Format it as a clear numbered list so I can follow along and check things off. Focus on the few actions that matter most and ignore everything else. Remember that I am a beginner, so patience and clarity matter more than speed.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeloR1bkQTD"},{"id":61,"title":"Principal Executive Recruiter","prompt":"Act as a Principal Executive Recruiter. I want to land my first $40,000 job with zero formal experience in 30 days. Conduct a 10-minute diagnostic based on my current skills, self-taught projects, and background. Deliver a strict, high-contrast text validation layout mapping 3 viable entry-level roles, my transferable skill anchors, and a 30-day execution roadmap to establish immediate hiring market candidate value.","category":"Career & Jobs","tags":["money","beginner","30-day"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DelhaTLDpif"},{"id":62,"title":"Zero To $200 In 7 Days","prompt":"Act as a beginner income coach. I have zero skills, zero audience, and no money. Build a 7-day plan to earn my first $200 online. Give me one specific action for each day, written so I always know exactly what comes next. Keep the tone friendly and encouraging, like a patient teacher helping a friend. Format it as a clear numbered list so I can follow along and check things off. Give me two options at the end so I can choose the one that feels easier.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DelamC7jB9L"},{"id":63,"title":"Principal Human Performance Specialist","prompt":"Act as a Principal Human Performance Specialist. I want to build a zero-cost 60-day at-home fitness transformation starting from zero. Conduct a 10-minute diagnostic based on my current age, weight, physical limitations, and daily schedule. Deliver a strict, high-contrast text validation layout mapping my starting baseline, daily movement capacity, and a clear 60-day body-recomposition roadmap.","category":"Health & Fitness","tags":["beginner","30-day"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DelTrrEE-_Y"},{"id":64,"title":"Elite Creative Web Architect (2)","prompt":"Act as an Elite Creative Web Architect. I want to construct an animated agency website designed to close $2,000 web design projects. Conduct a rapid 10-minute DOM architecture sprint. Deliver a clean layout skeleton using strict semantic HTML5 elements (header, nav, main, section, footer) coupled with a high-performance WebGL canvas, completely bypassing generic div wrappers.","category":"Web & Design","tags":["money","website-build"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DelF7GhDDr-"},{"id":65,"title":"Zero To Website Plan","prompt":"Act as a beginner web designer. I have never built a website and cannot code. Plan an ultra-premium, smoothly animated 3D-style website for [my business] that I can finish in 30 minutes, with every step in order. Make it realistic for someone starting from zero with a small budget and limited free time. Assume I have never done this before and explain anything unfamiliar in one short line. Use free tools only and name each one so I can find it easily.","category":"Web & Design","tags":["beginner","website-build","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dek_G3mCkPU"},{"id":66,"title":"Elite Creative Web Architect (3)","prompt":"Act as an Elite Creative Web Architect. I want to build a cinematic interactive portfolio website engineered to land $1,500 freelance projects. Conduct a rapid 10-minute DOM layout sprint. Deliver a clean layout skeleton using strict semantic HTML5 elements (header, nav, main, section, footer) coupled with a high-performance WebGL canvas, completely bypassing generic div wrappers.","category":"Web & Design","tags":["money","website-build"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dek4Q8HEZE9"},{"id":67,"title":"Zero To $3,000 Plan","prompt":"Act as a beginner business coach. I have zero experience and zero savings. Build my 90-day plan to reach $3,000/month online using my skills in [X]. Give me weekly goals and one clear action for every day. Make it realistic for someone starting from zero with a small budget and limited free time. Skip the hype and give me honest, practical guidance I can actually use this week. Give me the exact steps in order, with no jargon and no skipped parts.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DekxXOBkkWi"},{"id":68,"title":"Zero To Recruiter-Ready","prompt":"Act as a beginner LinkedIn coach. I have no LinkedIn profile. Build my plan to create one that attracts recruiters for [field] roles paying $50,000+. Give me steps in order, in plain language.","category":"Career & Jobs","tags":["money","beginner","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DekjrtuEXGw"},{"id":69,"title":"Zero To 10,000 Views","prompt":"Act as a beginner Reels coach. I have never posted a Reel. Build my 14-day plan to get my first Reel to 10,000 views in [niche]. Give me one daily action in plain language and keep it phone-only.","category":"Instagram & Social","tags":["beginner","30-day","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DekV486CfGS"},{"id":70,"title":"Zero To Booking Website (2)","prompt":"Act as a beginner web coach. I have no website. Plan a premium animated business website for [my service] with online booking, built with free or cheap tools. Give me steps in order, in plain language.","category":"Web & Design","tags":["beginner","website-build","plan"],"posted":"5d","url":"https://www.threads.com/@claudepromptsadvantage/post/DekI90LAn7K"},{"id":71,"title":"Principal Instagram Growth Strategist","prompt":"Act as a Principal Instagram Growth Strategist. I want an agency-grade audit of my Instagram profile. Conduct a 10-minute diagnostic based on my handle: [Handle], niche: [Niche], and target audience: [Audience]. Deliver a strict, high-contrast text validation layout mapping my bio hook, visual profile funnel, name-field SEO keywords, and avatar authority to establish instant profile conversion.","category":"Brand & Positioning","tags":["audit"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DejlyhvAa5n"},{"id":72,"title":"Zero To 1,000 Subscribers (1)","prompt":"Act as a beginner YouTube coach. I have zero videos and zero subscribers. Build my 60-day plan to reach 1,000 subscribers on a channel about [topic]. Give me weekly steps in plain language and a simple upload schedule.","category":"YouTube","tags":["beginner","30-day","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DejYC4hiV93"},{"id":73,"title":"Beginner To Premium Landing Page","prompt":"Act as a premium landing page coach. I’m a complete beginner. Plan an ultra-premium, smoothly animated landing page for [my offer] that looks like a $25K build. Give me the steps in plain language, with no coding needed.","category":"Web & Design","tags":["money","beginner","website-build","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DejOl8oApUA"},{"id":74,"title":"Zero To 1,000 Subscribers (2)","prompt":"Act as a beginner audience coach. I have no audience and no email list. Build my plan to get 1,000 email subscribers about [topic] and earn my first $300. Give me simple weekly steps in plain language.","category":"Business & Clients","tags":["money","beginner","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/Dei8sSlDHf8"},{"id":75,"title":"Zero To Portfolio In 30 Minutes","prompt":"Act as a beginner web designer. I have no website and no coding skills. Plan a premium animated portfolio website for my work in [field] that I can build in 30 minutes. Give me the steps in order, in plain language.","category":"Web & Design","tags":["beginner","website-build","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/Deiu65XAluQ"},{"id":76,"title":"Zero Ideas To $1,500 Plan","prompt":"Act as a beginner business coach. I have no business ideas and no experience. Help me find one idea that could earn $1,500/month and build a simple 30-day start plan. Use my interests in [list], and keep every step plain and beginner-friendly.","category":"Business & Clients","tags":["money","beginner","30-day","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeihMehANVf"},{"id":77,"title":"Phone Business To $2,000/Month","prompt":"Act as a beginner business coach. I only have a phone and no experience. Design a business I can run entirely from it that reaches $2,000/month within 6 months, based on my skills in [X]. Give simple monthly milestones.","category":"Business & Clients","tags":["money","beginner"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeiTctIE6Ld"},{"id":78,"title":"Zero To Faceless Channel","prompt":"Act as a faceless YouTube coach. I want to start a channel about [topic] without showing my face and with no equipment. Build my plan from zero to my first 10 uploads, in plain language and beginner-friendly steps.","category":"YouTube","tags":["beginner","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DeiEjCfgi6T"},{"id":79,"title":"Zero To First $300 (2)","prompt":"Act as a side hustle coach. I have $0 and no experience. Plan my first side hustle so I earn $300 within 30 days, using my skills in [X] and about [hours] free hours a week. Give simple weekly steps.","category":"Freelance Income","tags":["money","beginner","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/Deh4AxvjqMR"},{"id":80,"title":"Zero Experience To First Job","prompt":"Act as a career coach for beginners. I have no work experience. Build my 30-day plan to get hired for a role paying around $40,000 in [field]. Give me one simple action per day, in plain language.","category":"Career & Jobs","tags":["money","beginner","30-day","plan"],"posted":"6d","url":"https://www.threads.com/@claudepromptsadvantage/post/DehqTDuAoBr"}]}</script>
+<script>
+(function(){
+  "use strict";
+  const DATA = JSON.parse(document.getElementById('data').textContent);
+  const PROMPTS = DATA.prompts;
+  const META = DATA.meta;
+
+  const grid = document.getElementById('grid');
+  const catsEl = document.getElementById('cats');
+  const tagsEl = document.getElementById('tags');
+  const qEl = document.getElementById('q');
+  const sortEl = document.getElementById('sort');
+  const countEl = document.getElementById('count');
+  const clearEl = document.getElementById('clear');
+  const emptyEl = document.getElementById('empty');
+  const toastEl = document.getElementById('toast');
+
+  const state = { cat: 'All', tags: new Set(), q: '', sort: 'cat' };
+
+  // ---- category chips
+  const catCounts = {};
+  PROMPTS.forEach(p => catCounts[p.category] = (catCounts[p.category]||0)+1);
+  const catNames = Object.keys(catCounts).sort((a,b)=>catCounts[b]-catCounts[a]);
+
+  function mkChip(label, n, pressed, cls, onClick){
+    const b = document.createElement('button');
+    b.className = 'chip' + (cls ? ' ' + cls : '');
+    b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    b.innerHTML = '<span>'+label+'</span>' + (n!=null ? '<span class="n">'+n+'</span>' : '');
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function renderChipRow(){
+    catsEl.innerHTML = '';
+    catsEl.appendChild(mkChip('All', PROMPTS.length, state.cat==='All','',()=>{
+      state.cat='All'; apply();
+    }));
+    catNames.forEach(c=>{
+      catsEl.appendChild(mkChip(c, catCounts[c], state.cat===c,'',()=>{
+        state.cat = (state.cat===c) ? 'All' : c; apply();
+      }));
+    });
+
+    tagsEl.innerHTML = '';
+    const tagCounts = {};
+    PROMPTS.forEach(p => (p.tags||[]).forEach(t => tagCounts[t]=(tagCounts[t]||0)+1));
+    const tags = Object.keys(tagCounts).sort((a,b)=>tagCounts[b]-tagCounts[a]);
+    tags.forEach(t=>{
+      tagsEl.appendChild(mkChip('#'+t, tagCounts[t], state.tags.has(t),'tagchip',()=>{
+        state.tags.has(t) ? state.tags.delete(t) : state.tags.add(t);
+        apply();
+      }));
+    });
+  }
+
+  // ---- filtering
+  function filtered(){
+    let out = PROMPTS.filter(p=>{
+      if(state.cat!=='All' && p.category!==state.cat) return false;
+      if(state.tags.size){
+        for(const t of state.tags) if(!(p.tags||[]).includes(t)) return false;
+      }
+      if(state.q){
+        const hay = (p.title+' '+p.prompt+' '+p.category+' '+(p.tags||[]).join(' ')).toLowerCase();
+        if(!hay.includes(state.q)) return false;
+      }
+      return true;
+    });
+    const s = state.sort;
+    if(s==='az') out.sort((a,b)=>a.title.localeCompare(b.title));
+    else if(s==='len') out.sort((a,b)=>b.prompt.length-a.prompt.length);
+    else if(s==='new') out.sort((a,b)=>a.id-b.id);
+    else out.sort((a,b)=> catNames.indexOf(a.category)-catNames.indexOf(b.category) || a.title.localeCompare(b.title));
+    return out;
+  }
+
+  // ---- copy
+  function copy(text, btn){
+    const done = ()=>{
+      toast('Copied to clipboard');
+      if(btn){ const o=btn.textContent; btn.textContent='✓ Copied'; btn.classList.add('done');
+        setTimeout(()=>{btn.textContent=o; btn.classList.remove('done');},1400); }
+    };
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(done).catch(()=>fallback(text,done));
+    } else fallback(text,done);
+  }
+  function fallback(text, done){
+    const ta=document.createElement('textarea');
+    ta.value=text; ta.style.cssText='position:fixed;opacity:0;top:0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(e){ toast('Copy failed — select manually'); }
+    document.body.removeChild(ta);
+  }
+  let toastT;
+  function toast(msg){
+    toastEl.textContent=msg; toastEl.classList.add('show');
+    clearTimeout(toastT); toastT=setTimeout(()=>toastEl.classList.remove('show'),1700);
+  }
+
+  // ---- render
+  function render(list){
+    grid.innerHTML='';
+    const frag=document.createDocumentFragment();
+    list.forEach(p=>{
+      const card=document.createElement('article');
+      card.className='card';
+      const head=document.createElement('div'); head.className='cardhead';
+      const t=document.createElement('h2'); t.className='cardtitle'; t.textContent=p.title;
+      const c=document.createElement('span'); c.className='cat'; c.textContent=p.category;
+      head.append(t,c);
+
+      const body=document.createElement('div'); body.className='ptext'; body.textContent=p.prompt;
+
+      const foot=document.createElement('div'); foot.className='cardfoot';
+      const meta=document.createElement('div'); meta.className='meta';
+      (p.tags||[]).forEach(tg=>{ const s=document.createElement('span'); s.className='tg'; s.textContent='#'+tg; meta.appendChild(s); });
+
+      const acts=document.createElement('div'); acts.className='acts';
+      const exp=document.createElement('button'); exp.className='btn'; exp.textContent='Read more';
+      exp.addEventListener('click',()=>{
+        const open=card.classList.toggle('open');
+        exp.textContent = open ? 'Collapse' : 'Read more';
+      });
+      const cp=document.createElement('button'); cp.className='btn primary'; cp.textContent='Copy';
+      cp.addEventListener('click',()=>copy(p.prompt,cp));
+      const src=document.createElement('a'); src.className='btn'; src.textContent='↗';
+      src.href=p.url; src.target='_blank'; src.rel='noopener'; src.title='View original post';
+      acts.append(exp,cp,src);
+      foot.append(meta,acts);
+
+      card.append(head,body,foot);
+      if(p.prompt.length<260){ body.style.maxHeight='none'; body.classList.add('short'); }
+      frag.appendChild(card);
+    });
+    grid.appendChild(frag);
+    emptyEl.hidden = list.length>0;
+  }
+
+  function apply(){
+    const list=filtered();
+    render(list);
+    countEl.textContent = list.length===PROMPTS.length
+      ? PROMPTS.length+' prompts'
+      : list.length+' of '+PROMPTS.length+' prompts';
+    const active = state.cat!=='All' || state.tags.size>0 || state.q;
+    clearEl.hidden=!active;
+    // refresh chip pressed states without rebuilding whole row
+    [...catsEl.children].forEach((el,i)=>{
+      el.setAttribute('aria-pressed', i===0 ? state.cat==='All' : state.cat===catNames[i-1]);
+    });
+    [...tagsEl.children].forEach((el,i)=>{
+      const label=el.querySelector('span').textContent.slice(1);
+      el.setAttribute('aria-pressed', state.tags.has(label));
+    });
+  }
+
+  // ---- events
+  let qt;
+  qEl.addEventListener('input',()=>{
+    clearTimeout(qt);
+    qt=setTimeout(()=>{ state.q=qEl.value.trim().toLowerCase(); apply(); },110);
+  });
+  sortEl.addEventListener('change',()=>{ state.sort=sortEl.value; apply(); });
+  clearEl.addEventListener('click',reset);
+  const emptyReset=document.getElementById('emptyreset');
+  if(emptyReset) emptyReset.addEventListener('click',reset);
+  function reset(){
+    state.cat='All'; state.tags.clear(); state.q=''; qEl.value=''; sortEl.value='cat'; state.sort='cat'; apply();
+  }
+
+  // theme
+  const themeBtn=document.getElementById('theme');
+  const saved=localStorage.getItem('cpi-theme');
+  if(saved) document.documentElement.dataset.theme=saved;
+  themeBtn.addEventListener('click',()=>{
+    const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+    document.documentElement.dataset.theme=next;
+    localStorage.setItem('cpi-theme',next);
+  });
+
+  // keyboard: / focuses search
+  document.addEventListener('keydown',e=>{
+    if(e.key==='/' && document.activeElement!==qEl){ e.preventDefault(); qEl.focus(); }
+    if(e.key==='Escape' && document.activeElement===qEl){ qEl.value=''; state.q=''; apply(); qEl.blur(); }
+  });
+
+  renderChipRow();
+  apply();
+})();
+</script>
+</body>
+</html>
